@@ -1,0 +1,150 @@
+<resources>
+    <string name="app_name" translatable="false">Pods</string>
+
+    <string name="tab_home">Home</string>
+    <string name="tab_devices">Devices</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="connected">Connected</string>
+    <string name="not_connected">Not connected</string>
+    <string name="nearby">Nearby</string>
+    <string name="updated">Last updated: %1$s</string>
+    <string name="hint_learn">Open the case next to your phone and I\'ll remember your AirPods.</string>
+    <string name="hint_open">Open the case to see the battery.</string>
+    <string name="label_left">L</string>
+    <string name="label_right">R</string>
+    <string name="label_case">Case</string>
+    <string name="battery">Battery</string>
+
+    <string name="noise_control">Noise control</string>
+    <string name="mode_off">Off</string>
+    <string name="mode_anc">Noise Cancel</string>
+    <string name="mode_transparency">Transparency</string>
+    <string name="mode_adaptive">Adaptive</string>
+    <string name="conversation">Conversation Awareness</string>
+    <string name="conversation_sub">Lowers media volume when you start speaking</string>
+    <string name="adaptive_level">Adaptive strength</string>
+    <string name="adaptive_hint">Applies in Adaptive mode</string>
+    <string name="buttons">Stem controls</string>
+    <string name="buttons_sub">Actions for presses on each AirPod</string>
+    <string name="connect">Connect</string>
+
+    <string name="link_idle">Not connected</string>
+    <string name="link_connecting">Connecting…</string>
+    <string name="link_no_acl">AirPods aren\'t connected to the phone. I\'ll connect when they are.</string>
+    <string name="link_not_paired">No AirPods paired with this phone</string>
+    <string name="link_closed">Connection closed</string>
+    <string name="link_error">This phone doesn\'t allow the control channel: %1$s</string>
+
+    <string name="perm_banner">Permissions needed</string>
+    <string name="perm_banner_sub">Tap to allow, otherwise the app can\'t see your AirPods</string>
+    <string name="permissions">Permissions</string>
+    <string name="perm_bt">Nearby devices</string>
+    <string name="perm_bt_sub">To find AirPods and read their battery</string>
+    <string name="perm_notif">Notifications</string>
+    <string name="perm_notif_sub">Battery in the notification shade</string>
+    <string name="perm_overlay">Display over other apps</string>
+    <string name="perm_overlay_sub">For the pop-up when you open the case</string>
+    <string name="perm_battery">Unrestricted battery</string>
+    <string name="perm_battery_sub">So the app keeps working in the background</string>
+    <string name="allow">Allow</string>
+    <string name="allowed">Allowed</string>
+
+    <string name="section_general">General</string>
+    <string name="section_headphones">Headphones</string>
+    <string name="section_about">About</string>
+    <string name="popup">Pop-up on case open</string>
+    <string name="popup_sub">Battery card like on iPhone</string>
+    <string name="background">Run in background</string>
+    <string name="background_sub">Needed for the pop-up and notification</string>
+    <string name="appearance">Appearance</string>
+    <string name="appearance_system">System</string>
+    <string name="appearance_dark">Dark mode</string>
+    <string name="appearance_light">Light mode</string>
+    <string name="language">Language</string>
+    <string name="language_system">System</string>
+    <string name="my_airpods">My AirPods</string>
+    <string name="not_remembered">Not remembered yet</string>
+    <string name="test_popup">Show pop-up</string>
+    <string name="test_popup_sub">Preview with the latest data</string>
+    <string name="version">App version</string>
+    <string name="nearby_list">Nearby</string>
+    <string name="mine">Mine</string>
+    <string name="forget">Forget</string>
+    <string name="debug">Debug</string>
+    <string name="scanning">Scanning</string>
+    <string name="not_scanning">Not scanning (screen off or no permission)</string>
+    <string name="model_hint">The app picks your AirPods automatically the first time you open the case close to the phone.</string>
+
+    <string name="devices_title">Devices</string>
+    <string name="no_devices">No Apple headphones are paired with this phone. Pair them in Bluetooth settings.</string>
+    <string name="pair_new">Pair new headphones</string>
+
+    <string name="gestures_sub">«Default» works like on AirPods. Custom actions work while Pods is connected to the headphones.</string>
+    <string name="left_pod">Left AirPod</string>
+    <string name="right_pod">Right AirPod</string>
+    <string name="last_press">Last: %1$s</string>
+    <string name="press_single">Press once</string>
+    <string name="press_double">Press twice</string>
+    <string name="press_triple">Press three times</string>
+    <string name="press_long">Press and hold</string>
+    <string name="act_default">Default</string>
+    <string name="act_play_pause">Play / Pause</string>
+    <string name="act_next">Next track</string>
+    <string name="act_prev">Previous track</string>
+    <string name="act_vol_up">Volume up</string>
+    <string name="act_vol_down">Volume down</string>
+    <string name="act_anc">Noise Cancellation</string>
+    <string name="act_transparency">Transparency</string>
+    <string name="act_adaptive">Adaptive</string>
+    <string name="act_noise_off">Noise control off</string>
+    <string name="act_cycle">Noise Cancellation ↔ Transparency</string>
+    <string name="act_conversation">Toggle Conversation Awareness</string>
+    <string name="act_none">Nothing</string>
+
+    <string name="notif_channel">AirPods battery</string>
+    <string name="notif_searching">Looking for AirPods…</string>
+
+    <string name="notif_alerts">Battery alerts</string>
+    <string name="name_left">Left</string>
+    <string name="name_right">Right</string>
+    <string name="name_case">Case</string>
+    <string name="alert_low_title">Low AirPods battery</string>
+    <string name="alert_full_title">Fully charged</string>
+    <string name="alert_full_text">%1$s charged to 100%%</string>
+
+    <string name="notifications">Notifications</string>
+    <string name="notifications_sub">Battery alerts, lock screen</string>
+    <string name="alert_low">Low battery</string>
+    <string name="alert_low_sub">When an AirPod or the case drops to %1$d%%</string>
+    <string name="threshold">Threshold</string>
+    <string name="alert_full">Fully charged</string>
+    <string name="alert_full_sub">When charging reaches 100%</string>
+    <string name="lockscreen">Show on lock screen</string>
+    <string name="lockscreen_sub">Battery card in notifications</string>
+    <string name="system_notif">System notification settings</string>
+
+    <string name="charging">Charging</string>
+    <string name="charging_now">Charging…</string>
+    <string name="not_charging">Not charging</string>
+    <string name="charged">Fully charged</string>
+    <string name="est_time">Estimated time</string>
+    <string name="to_full">to 100%</string>
+    <string name="minutes">%1$d min</string>
+    <string name="hours">%1$d h %2$d min</string>
+    <string name="est_unknown">Open the case near the phone or connect AirPods to follow charging.</string>
+    <string name="est_typical">Typical speed for now. It gets more accurate after a few minutes.</string>
+    <string name="charging_banner">Charging · %1$s to 100%%</string>
+    <string name="widget_desc">AirPods battery</string>
+    <string name="widget">Battery widget</string>
+    <string name="widget_sub">Add to home screen</string>
+    <string name="bt_off">Bluetooth is off</string>
+    <string name="bt_off_sub">Turn it on to see your AirPods</string>
+    <string name="loc_off">Location is off</string>
+    <string name="loc_off_sub">This Android version needs it to find Bluetooth devices</string>
+    <string name="perm_location">Location</string>
+    <string name="perm_location_sub">Android 11 and older need it to scan for Bluetooth devices. Your location isn\'t used.</string>
+    <string name="loc_service">Location turned on</string>
+    <string name="loc_service_sub">Without it the phone doesn\'t see AirPods nearby</string>
+    <string name="turn_on">Turn on</string>
+</resources>

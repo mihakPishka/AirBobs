@@ -1,0 +1,21 @@
+# сборка
+.gradle/
+.kotlin/
+build/
+app/build/
+local.properties
+.idea/
+*.iml
+
+# подпись — никогда в git
+keystore.properties
+*.jks
+*.keystore
+
+# готовые APK и личная инструкция
+release/
+*.apk
+
+# фото AirPods — официальные рендеры Apple, публиковать нельзя.
+# Без них приложение рисует картинки само; свои кладите сюда же (см. README).
+app/src/main/res/drawable-nodpi/img_*
