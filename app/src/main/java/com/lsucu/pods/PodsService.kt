@@ -96,15 +96,17 @@ class PodsService : LifecycleService() {
         }
         // единый статус: BLE (кейс открыт) + точный заряд из канала (наушники в ушах)
         lifecycleScope.launch {
-            combine(PodsRepo.mine, Aap.battery, Aap.connected) { ble, exact, conn ->
-                withExactBattery(ble, exact) to conn
+            // ticker: когда пакеты перестают приходить, статус сам становится «не подключено»
+            combine(PodsRepo.mine, Aap.battery, Aap.connected, ticker(5_000)) { ble, exact, conn, now ->
+                liveStatus(ble, exact, now) to conn
             }.collect { (s, conn) ->
-                if (s == null) return@collect
-                Charge.add(s)
-                Notif.checkAlerts(this@PodsService, s)
+                if (s != null) {
+                    Charge.add(s)
+                    Notif.checkAlerts(this@PodsService, s)
+                    if (popup.isShowing && Aap.battery.value != null) popup.update(s)
+                }
                 updateNotification(s, conn)
                 BatteryWidget.update(this@PodsService, s, conn)
-                if (popup.isShowing && Aap.battery.value != null) popup.update(s)
             }
         }
     }
@@ -124,7 +126,7 @@ class PodsService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         if (intent?.action == "refresh") refreshNotification()
         if (intent?.action == "test_popup" && ::popup.isInitialized) {
-            val s = withExactBattery(PodsRepo.mine.value, Aap.battery.value) ?: demoStatus()
+            val s = liveStatus(PodsRepo.mine.value, Aap.battery.value) ?: demoStatus()
             popup.show(s, podsName(this, s.modelName))
         }
         return START_STICKY
@@ -197,7 +199,7 @@ class PodsService : LifecycleService() {
             if (++adCount % 20 == 0) Log.d(TAG, "ad interval ~${adInterval.toInt()} ms (last $gap)")
         }
         PodsRepo.onMine(s)
-        val shown = withExactBattery(s, Aap.battery.value) ?: s
+        val shown = withExactBattery(s, Aap.battery.value) ?: s  // s только что пришёл — свежий
 
         if (s.lidClosed) {
             if (popup.isShowing && !popup.isDemo) {
@@ -278,8 +280,8 @@ class PodsService : LifecycleService() {
 
     // ---------- уведомление ----------
 
-    private fun updateNotification(s: PodsStatus, connected: Boolean) {
-        val key = "${batteryLine(this, s)}|$connected|${Prefs.lockscreen}|${s.model}"
+    private fun updateNotification(s: PodsStatus?, connected: Boolean) {
+        val key = "${s?.let { batteryLine(this, it) }}|$connected|${Prefs.lockscreen}|${s?.model}"
         if (key == lastNotif) return
         lastNotif = key
         getSystemService(NotificationManager::class.java).notify(Notif.ID_STATUS, Notif.status(this, s, connected))
@@ -288,7 +290,7 @@ class PodsService : LifecycleService() {
     /** Настройки уведомлений поменялись — перерисовать карточку. */
     fun refreshNotification() {
         lastNotif = ""
-        withExactBattery(PodsRepo.mine.value, Aap.battery.value)?.let { updateNotification(it, Aap.connected.value) }
+        updateNotification(liveStatus(PodsRepo.mine.value, Aap.battery.value), Aap.connected.value)
     }
 }
 

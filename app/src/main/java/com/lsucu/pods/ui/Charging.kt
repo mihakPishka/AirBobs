@@ -43,7 +43,7 @@ import com.lsucu.pods.PodsModel
 import com.lsucu.pods.PodsRepo
 import com.lsucu.pods.Prefs
 import com.lsucu.pods.R
-import com.lsucu.pods.withExactBattery
+import com.lsucu.pods.liveStatus
 import kotlinx.coroutines.delay
 
 /** «~ 20 мин» / «≈ 1 ч 10 мин» (≈ — пока по типичной скорости). */
@@ -63,7 +63,7 @@ fun ChargingScreen(onBack: () -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) { while (true) { delay(20_000); tick++ } }
 
-    val s = withExactBattery(mine, exact)
+    val s = liveStatus(mine, exact, rememberNow())
     val model = PodsModel.of(s?.model ?: Prefs.model)
     val charging = Charge.anyCharging(s)
     val eta = remember(s, tick) { s?.let { Charge.eta(it) } }

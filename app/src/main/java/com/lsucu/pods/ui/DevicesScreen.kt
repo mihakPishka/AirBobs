@@ -50,7 +50,7 @@ import com.lsucu.pods.PodsModel
 import com.lsucu.pods.PodsRepo
 import com.lsucu.pods.Prefs
 import com.lsucu.pods.R
-import com.lsucu.pods.withExactBattery
+import com.lsucu.pods.liveStatus
 import kotlinx.coroutines.delay
 
 @Composable
@@ -63,7 +63,7 @@ fun DevicesScreen(openHome: () -> Unit) {
     }
     val mine by PodsRepo.mine.collectAsStateWithLifecycle()
     val exact by Aap.battery.collectAsStateWithLifecycle()
-    val my = withExactBattery(mine, exact)
+    val my = liveStatus(mine, exact, rememberNow())
     val myTarget = remember(devices) { Devices.target(ctx)?.address }
 
     Column(

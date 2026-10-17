@@ -56,25 +56,6 @@ object Prefs {
         get() = sp.getInt("lowThreshold", 20)
         set(v) = sp.edit().putInt("lowThreshold", v).apply()
 
-    /** Последний известный заряд — для виджета после перезагрузки. */
-    fun saveLast(s: PodsStatus) {
-        fun n(v: Int?) = v?.toString() ?: ""
-        sp.edit().putString(
-            "last",
-            listOf(n(s.left), n(s.right), n(s.case), s.leftCharging, s.rightCharging, s.caseCharging, s.model).joinToString(","),
-        ).apply()
-    }
-
-    fun loadLast(): PodsStatus? {
-        val p = sp.getString("last", null)?.split(",")?.takeIf { it.size == 7 } ?: return null
-        return PodsStatus(
-            model = p[6].toIntOrNull() ?: 0,
-            left = p[0].toIntOrNull(), right = p[1].toIntOrNull(), case = p[2].toIntOrNull(),
-            leftCharging = p[3] == "true", rightCharging = p[4] == "true", caseCharging = p[5] == "true",
-            statusByte = 0, lidByte = 0, rssi = 0, raw = "saved", time = 0,
-        )
-    }
-
     /** "" = как в системе, "en", "ru". */
     var lang: String
         get() = sp.getString("lang", "") ?: ""
@@ -160,6 +141,24 @@ object Perms {
 
     fun bluetoothOn(ctx: Context): Boolean =
         runCatching { ctx.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled == true }.getOrDefault(false)
+}
+
+/** Сколько BLE-данные считаются свежими: открытый кейс шлёт пакет раз в ~2.5 с. */
+const val BLE_FRESH_MS = 30_000L
+
+/**
+ * Текущий статус для показа: BLE — только свежий, точный заряд — только пока канал подключён
+ * (Aap.battery обнуляется при отключении). null = наушники сейчас не на связи.
+ */
+fun liveStatus(ble: PodsStatus?, exact: Aap.Battery?, now: Long = SystemClock.elapsedRealtime()): PodsStatus? =
+    withExactBattery(ble?.takeIf { now - it.time < BLE_FRESH_MS }, exact)
+
+/** Тикает каждые [periodMs] — чтобы устаревшие данные пропадали сами, без новых событий. */
+fun ticker(periodMs: Long) = kotlinx.coroutines.flow.flow {
+    while (true) {
+        emit(SystemClock.elapsedRealtime())
+        kotlinx.coroutines.delay(periodMs)
+    }
 }
 
 /**

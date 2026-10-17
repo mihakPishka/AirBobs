@@ -1,6 +1,7 @@
 package com.lsucu.pods.ui
 
 import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
@@ -34,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,12 +69,22 @@ import com.lsucu.pods.PodsService
 import com.lsucu.pods.Prefs
 import com.lsucu.pods.R
 import com.lsucu.pods.podsName
-import com.lsucu.pods.withExactBattery
+import com.lsucu.pods.liveStatus
 import kotlinx.coroutines.delay
 import java.util.Date
 import kotlin.math.roundToInt
 
 /** Все ли разрешения выданы (пересчитывается при возврате на экран). */
+/** Текущее время, обновляется каждые 5 с — чтобы устаревший заряд пропадал с экрана сам. */
+@Composable
+fun rememberNow(): Long {
+    var now by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    LaunchedEffect(Unit) {
+        while (true) { delay(5_000); now = SystemClock.elapsedRealtime() }
+    }
+    return now
+}
+
 /** Растёт при каждом возврате на экран — чтобы перепроверять системные настройки. */
 @Composable
 fun rememberResumes(): Int {
@@ -126,7 +138,7 @@ fun HomeScreen(
     }
     val isConnected = aapConnected || btConnected
 
-    val s = withExactBattery(mine, exact)
+    val s = liveStatus(mine, exact, rememberNow())
     val model = PodsModel.of(mine?.model ?: Prefs.model)
     val name = remember(model, isConnected) { podsName(ctx, model.title) }
 

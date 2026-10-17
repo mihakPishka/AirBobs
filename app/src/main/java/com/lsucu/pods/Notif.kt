@@ -64,7 +64,9 @@ object Notif {
         val model = PodsModel.of(s?.model ?: Prefs.model)
         val title = podsName(ctx, model.title)
         if (s == null) {
-            return b.setContentTitle(title).setContentText(ctx.getString(R.string.notif_searching)).build()
+            // данных сейчас нет: если наушники уже знакомы — «Не подключено», иначе «Ищу AirPods…»
+            val text = if (Prefs.model != 0) R.string.not_connected else R.string.notif_searching
+            return b.setContentTitle(title).setContentText(ctx.getString(text)).build()
         }
 
         val rv = RemoteViews(ctx.packageName, R.layout.notif_battery)

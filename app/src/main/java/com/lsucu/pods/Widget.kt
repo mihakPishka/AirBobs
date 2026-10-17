@@ -15,18 +15,17 @@ class BatteryWidget : AppWidgetProvider() {
 
     override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
         // система просит перерисовать (добавили виджет, перезагрузка) — берём последнее известное
-        render(ctx, mgr, ids, Prefs.loadLast(), Aap.connected.value)
+        render(ctx, mgr, ids, liveStatus(PodsRepo.mine.value, Aap.battery.value), Aap.connected.value)
     }
 
     companion object {
         private var lastKey = ""
 
-        fun update(ctx: Context, s: PodsStatus, connected: Boolean) {
-            Prefs.saveLast(s)
+        fun update(ctx: Context, s: PodsStatus?, connected: Boolean) {
             val mgr = AppWidgetManager.getInstance(ctx)
             val ids = mgr.getAppWidgetIds(ComponentName(ctx, BatteryWidget::class.java))
             if (ids.isEmpty()) return
-            val key = "${s.left}|${s.right}|${s.case}|${s.leftCharging}|${s.rightCharging}|${s.caseCharging}|$connected|${s.model}"
+            val key = "${s?.left}|${s?.right}|${s?.case}|${s?.leftCharging}|${s?.rightCharging}|${s?.caseCharging}|$connected|${s?.model}"
             if (key == lastKey) return
             lastKey = key
             render(ctx, mgr, ids, s, connected)
