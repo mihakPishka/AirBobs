@@ -1,4 +1,6 @@
-# Pods — AirPods companion for Android
+# AirBobs
+
+**Pods** — AirPods companion app for Android.
 
 iPhone-style AirPods experience on Android, **no root required**.
 
@@ -32,6 +34,10 @@ Battery and the pop-up work on practically any Android phone. Noise control and 
 
 Protocol research credits: [LibrePods](https://github.com/kavishdevar/librepods), [OpenPods](https://github.com/adolfintel/OpenPods), furiousMAC's continuity docs.
 
+## Install
+
+Grab the APK from [Releases](../../releases), open it on the phone and allow installing from that source. Then open Pods, tap the yellow **Permissions needed** card and allow everything; open the AirPods case near the phone once so the app remembers your model.
+
 ## Build
 
 Requirements: JDK 17, Android SDK (platform 36).
@@ -51,10 +57,14 @@ keyPassword=…
 
 ## Product images
 
-The repo ships without product photos: the app draws its own illustrations. To use your own pictures, drop transparent PNGs into `app/src/main/res/drawable-nodpi/`:
+The repo ships without product photos: the app draws its own illustrations. To use your own pictures, drop transparent PNGs into `app/src/photos/res/drawable-nodpi/` (git-ignored; `-PpublicBuild` builds without them):
 
 `img_<family>_pods.png` (pair), `img_<family>_case.png`, `img_<family>_pod.png` (single, right bud)
 where `<family>` is `airpods12`, `airpods3`, `airpods4`, `pro`, `pro3` or `max`.
+
+## License
+
+[MIT](LICENSE)
 
 ## Disclaimer
 

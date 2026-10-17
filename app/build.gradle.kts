@@ -46,6 +46,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures { compose = true }
+
+    // Фото AirPods (рендеры Apple) лежат отдельно и в git не попадают.
+    // Публичная сборка: ./gradlew assembleRelease -PpublicBuild — без фото, с рисованными картинками.
+    if (!project.hasProperty("publicBuild")) {
+        sourceSets["main"].res.srcDir("src/photos/res")
+    }
 }
 
 dependencies {

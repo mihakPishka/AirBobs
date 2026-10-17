@@ -18,4 +18,4 @@ release/
 
 # фото AirPods — официальные рендеры Apple, публиковать нельзя.
 # Без них приложение рисует картинки само; свои кладите сюда же (см. README).
-app/src/main/res/drawable-nodpi/img_*
+app/src/photos/
