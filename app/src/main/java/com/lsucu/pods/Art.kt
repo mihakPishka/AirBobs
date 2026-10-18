@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.lsucu.pods.ui.floating
 import kotlin.math.min
 import kotlin.math.sqrt
 
@@ -66,11 +67,11 @@ fun PodsArt(family: Family, part: Part, modifier: Modifier = Modifier) {
 @Composable
 fun PodsHero(family: Family, modifier: Modifier = Modifier, height: Dp = 250.dp) {
     if (family == Family.MAX) {
-        PodsArt(Family.MAX, Part.PODS, modifier.fillMaxWidth(0.6f).height(height * 0.85f))
+        PodsArt(Family.MAX, Part.PODS, modifier.fillMaxWidth(0.6f).height(height * 0.85f).floating())
         return
     }
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
-        PodsArt(family, Part.PODS, Modifier.fillMaxWidth(0.5f).height(height * 0.46f))
+        PodsArt(family, Part.PODS, Modifier.fillMaxWidth(0.5f).height(height * 0.46f).floating())
         PodsArt(family, Part.CASE, Modifier.fillMaxWidth(0.56f).height(height * 0.54f).offset(y = (-6).dp))
     }
 }

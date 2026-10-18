@@ -5,6 +5,20 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -166,7 +180,8 @@ fun HomeScreen(
             IconButton(onClick = openSettings) { Icon(Icons.Outlined.Settings, null, tint = c.text) }
         }
 
-        if (!permsOk) {
+        AnimatedVisibility(!permsOk, enter = bannerIn, exit = bannerOut) {
+          Column {
             Spacer(Modifier.height(14.dp))
             PodsCard(Modifier.fillMaxWidth(), onClick = openPermissions) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -179,6 +194,7 @@ fun HomeScreen(
                     Chevron()
                 }
             }
+          }
         }
 
         val resumes = rememberResumes()
@@ -187,24 +203,28 @@ fun HomeScreen(
         LaunchedEffect(resumes) {
             while (true) { btOn = Perms.bluetoothOn(ctx); locOn = Perms.locationOn(ctx); delay(3_000) }
         }
-        if (!btOn) {
-            Spacer(Modifier.height(14.dp))
-            Banner(Glyph.HEADPHONES, stringResource(R.string.bt_off), stringResource(R.string.bt_off_sub)) {
-                ctx.startActivity(android.content.Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+        AnimatedVisibility(!btOn, enter = bannerIn, exit = bannerOut) {
+            Column {
+                Spacer(Modifier.height(14.dp))
+                Banner(Glyph.HEADPHONES, stringResource(R.string.bt_off), stringResource(R.string.bt_off_sub)) {
+                    ctx.startActivity(android.content.Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                }
             }
         }
-        if (!locOn) {
-            Spacer(Modifier.height(14.dp))
-            Banner(Glyph.GLOBE, stringResource(R.string.loc_off), stringResource(R.string.loc_off_sub)) {
-                ctx.startActivity(android.content.Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        AnimatedVisibility(!locOn, enter = bannerIn, exit = bannerOut) {
+            Column {
+                Spacer(Modifier.height(14.dp))
+                Banner(Glyph.GLOBE, stringResource(R.string.loc_off), stringResource(R.string.loc_off_sub)) {
+                    ctx.startActivity(android.content.Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
             }
         }
 
         // ---- картинка ----
         Spacer(Modifier.height(18.dp))
-        PodsHero(model.family, Modifier.fillMaxWidth())
+        PodsHero(model.family, Modifier.fillMaxWidth().appear(0, 28.dp))
         Spacer(Modifier.height(10.dp))
-        Text(model.title, Modifier.fillMaxWidth(), color = c.text, fontSize = 16.sp,
+        Text(model.title, Modifier.fillMaxWidth().appear(80), color = c.text, fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
         if (updatedAt > 0) {
             Text(
@@ -217,7 +237,7 @@ fun HomeScreen(
         // ---- заряд ----
         Spacer(Modifier.height(18.dp))
         Row(
-            Modifier.fillMaxWidth().clip(CardShape).clickable(onClick = openCharging),
+            Modifier.fillMaxWidth().appear(140).clip(CardShape).clickable(onClick = openCharging),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (model.family == Family.MAX) {
@@ -245,12 +265,13 @@ fun HomeScreen(
         }
 
         // ---- зарядка ----
-        if (s != null && Charge.anyCharging(s)) {
-            val eta = remember(s) { Charge.eta(s) }
+        AnimatedVisibility(s != null && Charge.anyCharging(s), enter = bannerIn, exit = bannerOut) {
+          Column {
+            val eta = remember(s) { s?.let { Charge.eta(it) } }
             Spacer(Modifier.height(12.dp))
             PodsCard(Modifier.fillMaxWidth(), onClick = openCharging, padding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    LineIcon(Glyph.BOLT, c.green, 20.dp)
+                    ChargingBolt(20.dp)
                     Spacer(Modifier.width(12.dp))
                     Text(
                         if (eta != null && eta.minutes > 0) stringResource(R.string.charging_banner, etaText(ctx, eta))
@@ -260,16 +281,17 @@ fun HomeScreen(
                     Chevron()
                 }
             }
+          }
         }
 
         // ---- управление ----
         if (model.anc) {
             Spacer(Modifier.height(14.dp))
-            NoiseCard(model)
+            Box(Modifier.appear(200)) { NoiseCard(model) }
         }
         if (model.stem) {
             Spacer(Modifier.height(14.dp))
-            PodsCard(Modifier.fillMaxWidth(), padding = PaddingValues(0.dp)) {
+            PodsCard(Modifier.fillMaxWidth().appear(260), padding = PaddingValues(0.dp)) {
                 SettingsItem(
                     stringResource(R.string.buttons),
                     stringResource(R.string.buttons_sub),
@@ -313,15 +335,14 @@ private fun BatteryTile(
             BatteryRing(value, charging, ringSize = 74.dp, stroke = 6.dp) { icon() }
             Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (charging) {
-                    LineIcon(Glyph.BOLT, c.green, 13.dp)
-                    Spacer(Modifier.width(2.dp))
+                AnimatedVisibility(charging) {
+                    Row { ChargingBolt(13.dp); Spacer(Modifier.width(2.dp)) }
                 }
                 Text(label, color = if (value != null) batteryColor(c, value, charging) else c.text2,
                     fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
             Spacer(Modifier.height(2.dp))
-            Text(value?.let { "$it%" } ?: "—", color = c.text, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            PercentText(value, c.text, 24.sp)
         }
     }
 }
@@ -362,31 +383,7 @@ private fun NoiseCard(model: PodsModel) {
             add(Aap.Mode.OFF); add(Aap.Mode.ANC); add(Aap.Mode.TRANSPARENCY)
             if (model.adaptive) add(Aap.Mode.ADAPTIVE)
         }
-        Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(c.track.copy(alpha = 0.5f)).padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            modes.forEach { m ->
-                val sel = m == mode
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (sel) c.accent else Color.Transparent)
-                        .clickable { Aap.setMode(m) }
-                        .padding(vertical = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    ModeIcon(m, if (sel) Color.White else c.text)
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        stringResource(m.label), color = if (sel) Color.White else c.text,
-                        fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Normal,
-                    )
-                }
-            }
-        }
+        ModeSelector(modes, mode)
 
         if (model.conversation) {
             Spacer(Modifier.height(14.dp))
@@ -464,3 +461,55 @@ private fun ModeIcon(m: Aap.Mode, tint: Color) {
         }
     }
 }
+
+/** Сегменты режимов; синяя плашка плавно переезжает к выбранному. */
+@Composable
+private fun ModeSelector(modes: List<Aap.Mode>, mode: Aap.Mode?) {
+    val c = LocalPods.current
+    val gap = 4.dp
+    BoxWithConstraints(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(c.track.copy(alpha = 0.5f)).padding(4.dp),
+    ) {
+        val segW = (maxWidth - gap * (modes.size - 1)) / modes.size
+        val idx = modes.indexOf(mode)
+        val x by animateDpAsState(
+            if (idx >= 0) (segW + gap) * idx else 0.dp,
+            spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow), label = "pill",
+        )
+        val pillAlpha by animateFloatAsState(if (idx >= 0) 1f else 0f, label = "pillAlpha")
+        // плашка под выбранным сегментом
+        Box(
+            Modifier
+                .matchParentSize()
+                .offset(x = x)
+                .graphicsLayer { alpha = pillAlpha },
+        ) {
+            Box(Modifier.width(segW).fillMaxHeight().clip(RoundedCornerShape(12.dp)).background(c.accent))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            modes.forEach { m ->
+                val sel = m == mode
+                val fg by animateColorAsState(if (sel) Color.White else c.text, tween(250), label = "segFg")
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { Aap.setMode(m) }
+                        .padding(vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    ModeIcon(m, fg)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        stringResource(m.label), color = fg,
+                        fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val bannerIn = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(250))
+private val bannerOut = shrinkVertically(tween(250)) + fadeOut(tween(180))

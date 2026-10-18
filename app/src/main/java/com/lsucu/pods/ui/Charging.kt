@@ -73,9 +73,9 @@ fun ChargingScreen(onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             if (model.family == Family.MAX) {
-                PodsArt(Family.MAX, Part.PODS, Modifier.fillMaxWidth(0.6f).height(190.dp))
+                PodsArt(Family.MAX, Part.PODS, Modifier.fillMaxWidth(0.6f).height(190.dp).appear(0, 28.dp).floating())
             } else {
-                PodsArt(model.family, Part.CASE, Modifier.fillMaxWidth(0.62f).height(190.dp))
+                PodsArt(model.family, Part.CASE, Modifier.fillMaxWidth(0.62f).height(190.dp).appear(0, 28.dp))
             }
         }
         Spacer(Modifier.height(10.dp))
@@ -117,7 +117,7 @@ fun ChargingScreen(onBack: () -> Unit) {
                 Box(
                     Modifier.size(44.dp).clip(CircleShape).background(c.green.copy(alpha = 0.16f)),
                     contentAlignment = Alignment.Center,
-                ) { LineIcon(Glyph.BOLT, c.green, 22.dp) }
+                ) { if (charging) ChargingBolt(22.dp) else LineIcon(Glyph.BOLT, c.green, 22.dp) }
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.est_time), color = c.text2, fontSize = 14.sp)
@@ -154,10 +154,10 @@ private fun ChargeRing(label: String, value: Int?, charging: Boolean, icon: @Com
         BatteryRing(value, charging, ringSize = 84.dp, stroke = 6.dp) { icon() }
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (charging) { LineIcon(Glyph.BOLT, c.green, 13.dp); Spacer(Modifier.width(2.dp)) }
+            if (charging) { ChargingBolt(13.dp); Spacer(Modifier.width(2.dp)) }
             Text(label, color = if (value != null) batteryColor(c, value, charging) else c.text2,
                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
-        Text(value?.let { "$it%" } ?: "—", color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        PercentText(value, c.text, 22.sp)
     }
 }

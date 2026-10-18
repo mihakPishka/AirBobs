@@ -24,7 +24,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,7 +75,7 @@ fun batteryColor(c: PodsColors, value: Int?, charging: Boolean): Color = when {
     else -> c.red
 }
 
-/** Кольцо заряда; в центре — что угодно (иконка наушника, кейса, молния). */
+/** Кольцо заряда; в центре — что угодно (иконка наушника, кейса, молния). Заполняется плавно. */
 @Composable
 fun BatteryRing(
     value: Int?,
@@ -78,27 +85,42 @@ fun BatteryRing(
     center: @Composable () -> Unit,
 ) {
     val c = LocalPods.current
+    // при показе кольцо заполняется от 0, дальше плавно доезжает до нового значения
+    val sweep = animatedFromZero((value ?: 0).coerceIn(0, 100) / 100f)
+    val color by animateColorAsState(batteryColor(c, value, charging), tween(500), label = "ringColor")
     Box(Modifier.size(ringSize), contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(ringSize)) {
             val w = stroke.toPx()
             val tl = Offset(w / 2, w / 2)
             val s = Size(size.width - w, size.height - w)
             drawArc(c.track, 0f, 360f, false, tl, s, style = Stroke(w))
-            if (value != null) {
-                drawArc(
-                    batteryColor(c, value, charging), -90f, 360f * value.coerceIn(0, 100) / 100f, false, tl, s,
-                    style = Stroke(w, cap = StrokeCap.Round),
-                )
+            if (value != null && sweep > 0.001f) {
+                drawArc(color, -90f, 360f * sweep, false, tl, s, style = Stroke(w, cap = StrokeCap.Round))
             }
         }
         center()
     }
 }
 
+/** Точка статуса; «подключено» — тихо пульсирует ореолом. */
 @Composable
 fun StatusDot(on: Boolean, size: Dp = 8.dp) {
     val c = LocalPods.current
-    Box(Modifier.size(size).clip(CircleShape).background(if (on) c.green else c.text2))
+    val dot by animateColorAsState(if (on) c.green else c.text2, tween(400), label = "dot")
+    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+        if (on) {
+            val t = rememberInfiniteTransition(label = "halo")
+            val k by t.animateFloat(
+                initialValue = 0f, targetValue = 1f,
+                animationSpec = infiniteRepeatable(tween(1600, easing = LinearOutSlowInEasing)),
+                label = "haloK",
+            )
+            Canvas(Modifier.size(size)) {
+                drawCircle(c.green.copy(alpha = 0.45f * (1f - k)), radius = size.toPx() / 2 * (1f + 1.3f * k))
+            }
+        }
+        Box(Modifier.size(size).clip(CircleShape).background(dot))
+    }
 }
 
 @Composable

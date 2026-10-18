@@ -7,6 +7,20 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -112,31 +126,51 @@ private fun App(onAppearance: (Int) -> Unit, onLanguage: (String) -> Unit) {
     ) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.weight(1f).statusBarsPadding()) {
+                // вкладки сменяются затуханием, вложенные экраны въезжают справа и уезжают обратно
+                AnimatedContent(
+                    targetState = sub to tab,
+                    transitionSpec = {
+                        val (fromSub, _) = initialState
+                        val (toSub, _) = targetState
+                        when {
+                            fromSub < 0 && toSub >= 0 ->
+                                (slideInHorizontally(tween(320)) { it / 3 } + fadeIn(tween(260))) togetherWith
+                                    (slideOutHorizontally(tween(320)) { -it / 8 } + fadeOut(tween(200)))
+                            fromSub >= 0 && toSub < 0 ->
+                                (slideInHorizontally(tween(320)) { -it / 8 } + fadeIn(tween(260))) togetherWith
+                                    (slideOutHorizontally(tween(320)) { it / 3 } + fadeOut(tween(200)))
+                            // новый экран проявляется после того, как старый ушёл — без «двойной экспозиции»
+                            else -> fadeIn(tween(200, delayMillis = 110)) togetherWith fadeOut(tween(110))
+                        }
+                    },
+                    label = "screens",
+                ) { (shownSub, shownTab) ->
                 when {
-                    sub == Sub.GESTURES.ordinal -> GesturesScreen(back)
-                    sub == Sub.PERMISSIONS.ordinal -> PermissionsScreen(back)
-                    sub == Sub.HEADPHONES.ordinal -> HeadphonesScreen(back)
-                    sub == Sub.CHARGING.ordinal -> ChargingScreen(back)
-                    sub == Sub.NOTIFICATIONS.ordinal -> NotificationsScreen(back)
-                    tab == Tab.HOME.ordinal -> HomeScreen(
+                    shownSub == Sub.GESTURES.ordinal -> GesturesScreen(back)
+                    shownSub == Sub.PERMISSIONS.ordinal -> PermissionsScreen(back)
+                    shownSub == Sub.HEADPHONES.ordinal -> HeadphonesScreen(back)
+                    shownSub == Sub.CHARGING.ordinal -> ChargingScreen(back)
+                    shownSub == Sub.NOTIFICATIONS.ordinal -> NotificationsScreen(back)
+                    shownTab == Tab.HOME.ordinal -> HomeScreen(
                         openGestures = { open(Sub.GESTURES) },
                         openPermissions = { open(Sub.PERMISSIONS) },
                         openSettings = { tab = Tab.SETTINGS.ordinal },
                         openCharging = { open(Sub.CHARGING) },
                     )
-                    tab == Tab.DEVICES.ordinal -> DevicesScreen(openHome = { tab = Tab.HOME.ordinal })
+                    shownTab == Tab.DEVICES.ordinal -> DevicesScreen(openHome = { tab = Tab.HOME.ordinal })
                     else -> SettingsScreen(
                         open = open,
                         onAppearance = onAppearance,
                         onLanguage = onLanguage,
                     )
                 }
+                }
             }
-            if (sub < 0) {
+            // нижнее меню плавно уезжает вниз на вложенных экранах
+            AnimatedVisibility(sub < 0, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
                 BottomBar(Tab.entries[tab]) { tab = it.ordinal }
-            } else {
-                Spacer(Modifier.navigationBarsPadding())
             }
+            if (sub >= 0) Spacer(Modifier.navigationBarsPadding())
         }
     }
 }
@@ -171,9 +205,11 @@ private fun BottomBar(current: Tab, onSelect: (Tab) -> Unit) {
 @Composable
 private fun BarItem(label: String, selected: Boolean, onClick: () -> Unit, icon: @Composable (Color) -> Unit) {
     val c = LocalPods.current
-    val tint = if (selected) c.accent else c.text2
+    val tint by animateColorAsState(if (selected) c.accent else c.text2, tween(250), label = "tabTint")
+    val scale by animateFloatAsState(if (selected) 1.08f else 1f, spring(dampingRatio = 0.5f), label = "tabScale")
     Column(
         Modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(14.dp))
             .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onClick)
             .padding(horizontal = 18.dp, vertical = 6.dp),

@@ -68,6 +68,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.border
 import androidx.compose.ui.res.stringResource
 import com.lsucu.pods.ui.BatteryRing
+import com.lsucu.pods.ui.ChargingBolt
+import com.lsucu.pods.ui.PercentText
+import com.lsucu.pods.ui.appear
 import com.lsucu.pods.ui.Glyph
 import com.lsucu.pods.ui.LineIcon
 import com.lsucu.pods.ui.LocalPods
@@ -258,13 +261,13 @@ fun PopupCard(s: PodsStatus?, title: String, onClose: () -> Unit) {
             ) {
                 if (family == Family.MAX) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        PodsArt(Family.MAX, Part.PODS, Modifier.width(160.dp).height(130.dp))
+                        PodsArt(Family.MAX, Part.PODS, Modifier.width(160.dp).height(130.dp).appear(120, 36.dp))
                         Spacer(Modifier.height(14.dp))
                         PopupRing("", s?.left ?: s?.right, s?.leftCharging == true)
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        PodsArt(family, Part.PODS, Modifier.width(140.dp).height(120.dp))
+                        PodsArt(family, Part.PODS, Modifier.width(140.dp).height(120.dp).appear(120, 36.dp))
                         Spacer(Modifier.height(14.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             PopupRing(stringResource(R.string.label_left), s?.left, s?.leftCharging == true)
@@ -272,7 +275,7 @@ fun PopupCard(s: PodsStatus?, title: String, onClose: () -> Unit) {
                         }
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        PodsArt(family, Part.CASE, Modifier.width(120.dp).height(120.dp))
+                        PodsArt(family, Part.CASE, Modifier.width(120.dp).height(120.dp).appear(200, 36.dp))
                         Spacer(Modifier.height(14.dp))
                         PopupRing(stringResource(R.string.label_case), s?.case, s?.caseCharging == true)
                     }
@@ -287,10 +290,10 @@ private fun PopupRing(label: String, value: Int?, charging: Boolean) {
     val c = LocalPods.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         BatteryRing(value, charging, ringSize = 50.dp, stroke = 5.dp) {
-            if (charging) LineIcon(Glyph.BOLT, c.green, 18.dp)
+            if (charging) ChargingBolt(18.dp)
             else Text(label, color = c.text2, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
         }
         Spacer(Modifier.height(6.dp))
-        Text(value?.let { "$it%" } ?: "—", color = c.text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        PercentText(value, c.text, 16.sp, FontWeight.SemiBold)
     }
 }
