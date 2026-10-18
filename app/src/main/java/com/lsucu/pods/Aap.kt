@@ -45,6 +45,8 @@ object Aap {
     private val NOTIFICATIONS = hex("04 00 04 00 0F 00 FF FF FF FF")
     private val CONTROL = hex("04 00 04 00 09 00")
     private val BATTERY = hex("04 00 04 00 04 00")
+    private val REQUEST_KEYS = hex("04 00 04 00 30 00 05 00")
+    private val KEYS = hex("04 00 04 00 31 00")
     private const val ID_NOISE = 0x0D
     private const val ID_CONVERSATION = 0x28  // 01 = вкл, 02 = выкл
     private const val ID_ADAPTIVE_LEVEL = 0x2E // 0..100
@@ -176,6 +178,9 @@ object Aap {
         send(NOTIFICATIONS)
         // перехват жестов живёт только в рамках соединения — включаем заново
         Gestures.mask().let { if (it != 0) { Thread.sleep(150); setStemIntercept(it) } }
+        // ключи (IRK + ключ шифрования рекламы): по ним отличаем свои AirPods от чужих той же модели
+        Thread.sleep(150)
+        send(REQUEST_KEYS)
 
         val input = s.inputStream
         val buf = ByteArray(4096)
@@ -199,6 +204,7 @@ object Aap {
                 }
             }
             p.size >= 7 && p.startsWith(BATTERY) -> parseBattery(p)
+            p.size >= 7 && p.startsWith(KEYS) -> parseKeys(p)
             p.size >= 8 && p.startsWith(STEM_EVENT) -> {
                 val press = Press.entries.firstOrNull { it.code == (p[6].toInt() and 0xFF) }
                 val bud = p[7].toInt() and 0xFF
@@ -206,6 +212,31 @@ object Aap {
                 if (press != null) _stem.tryEmit(StemPress(press, left = bud == 0x01))
             }
         }
+    }
+
+    /**
+     * Ответ на запрос ключей (по LibrePods): [6] = число ключей, дальше на каждый:
+     * тип (01 = IRK, 04 = ключ шифрования рекламы), 00, длина, 00, сам ключ.
+     */
+    private fun parseKeys(p: ByteArray) {
+        val n = p[6].toInt() and 0xFF
+        var o = 7
+        var irk: ByteArray? = null
+        var enc: ByteArray? = null
+        repeat(n) {
+            if (o + 4 > p.size) return@repeat
+            val type = p[o].toInt() and 0xFF
+            val len = p[o + 2].toInt() and 0xFF
+            if (o + 4 + len > p.size) return@repeat
+            val key = p.copyOfRange(o + 4, o + 4 + len)
+            when (type) {
+                0x01 -> irk = key
+                0x04 -> enc = key
+            }
+            o += 4 + len
+        }
+        log("keys: ${n} шт, irk=${irk != null}, enc=${enc != null}")
+        if (irk != null || enc != null) Identity.store(irk, enc)
     }
 
     /** [6] = число блоков, дальше по 5 байт: компонент, 01, уровень, статус, 01. */

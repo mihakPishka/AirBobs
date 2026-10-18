@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -54,6 +55,7 @@ import com.lsucu.pods.Aap
 import com.lsucu.pods.Action
 import com.lsucu.pods.AirPodsParser
 import com.lsucu.pods.Gestures
+import com.lsucu.pods.Identity
 import com.lsucu.pods.Perms
 import com.lsucu.pods.PodsRepo
 import com.lsucu.pods.PodsService
@@ -311,8 +313,28 @@ fun HeadphonesScreen(onBack: () -> Unit) {
                 color = if (scanning) c.green else c.text2, fontSize = 12.sp,
             )
             if (model != 0) {
-                TextButton(onClick = { Prefs.model = 0; model = 0; PodsRepo.clearNearby() }) {
+                TextButton(onClick = { Identity.forget(); Prefs.model = 0; model = 0; PodsRepo.clearNearby() }) {
                     Text(stringResource(R.string.forget))
+                }
+            }
+        }
+
+        // ---- защита от чужих AirPods ----
+        val hasKeys = remember(now) { Identity.hasKeys() }
+        Spacer(Modifier.height(12.dp))
+        PodsCard(Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LineIcon(Glyph.SHIELD, if (hasKeys) c.green else c.yellow)
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(if (hasKeys) R.string.guard_on else R.string.guard_basic),
+                        color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        stringResource(if (hasKeys) R.string.guard_on_sub else R.string.guard_basic_sub),
+                        color = c.text2, fontSize = 13.sp,
+                    )
                 }
             }
         }

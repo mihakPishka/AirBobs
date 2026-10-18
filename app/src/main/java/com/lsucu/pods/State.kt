@@ -39,6 +39,16 @@ object Prefs {
         get() = sp.getBoolean("popup", true)
         set(v) = sp.edit().putBoolean("popup", v).apply()
 
+    /** IRK своих AirPods (hex, 16 байт) — по нему узнаём их BLE-адреса среди чужих. */
+    var irk: String
+        get() = sp.getString("irk", "") ?: ""
+        set(v) = sp.edit().putString("irk", v).apply()
+
+    /** Ключ шифрования рекламы (на будущее: точный заряд из BLE). */
+    var encKey: String
+        get() = sp.getString("encKey", "") ?: ""
+        set(v) = sp.edit().putString("encKey", v).apply()
+
     var lockscreen: Boolean
         get() = sp.getBoolean("lockscreen", true)
         set(v) = sp.edit().putBoolean("lockscreen", v).apply()

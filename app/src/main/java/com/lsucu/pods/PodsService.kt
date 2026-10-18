@@ -34,10 +34,11 @@ class PodsService : LifecycleService() {
     companion object {
         const val TAG = "Pods"
         // тишина = кейс закрыли; порог подстраивается под частоту рекламы (~2.5 интервала)
-        private const val LID_CLOSED_MIN_MS = 1_200L
-        private const val LID_CLOSED_MAX_MS = 4_000L
+        private const val LID_CLOSED_MIN_MS = 4_000L  // быстрое закрытие и так ловим по флагу крышки
+        private const val LID_CLOSED_MAX_MS = 6_000L
         private const val NEW_SESSION_MS = 6_000L  // столько тишины перед сигналом = кейс открыли заново
         private const val LEARN_RSSI = -55         // так близко — точно наши, запоминаем модель
+        private const val STRICT_RSSI = -60        // без ключа: дальше этого чужие не считаются нашими
 
         fun start(ctx: Context) {
             if (!Perms.bluetooth(ctx)) return
@@ -190,7 +191,7 @@ class PodsService : LifecycleService() {
             lastRaw = s.raw
             Log.d(TAG, "ad ${s.modelHex} rssi=${s.rssi} st=%02X lid=%02X raw=${s.raw}".format(s.statusByte, s.lidByte))
         }
-        if (!isMine(s)) return
+        if (!isMine(s, r.device.address)) return
 
         val gap = now - lastSeen
         lastSeen = now
@@ -216,8 +217,22 @@ class PodsService : LifecycleService() {
         }
     }
 
-    private fun isMine(s: PodsStatus): Boolean {
-        if (s.rssi < Prefs.minRssi) return false
+    /**
+     * Свои ли это AirPods.
+     * 1) Есть ключ IRK (получен из канала управления) — только по нему: чужие той же модели не пройдут.
+     * 2) Ключа нет — строгий запасной режим: на телефоне есть спаренные AirPods, модель совпадает
+     *    и сигнал очень сильный (наушники буквально у телефона).
+     */
+    private fun isMine(s: PodsStatus, address: String): Boolean {
+        Identity.isMine(address)?.let { mine ->
+            if (mine && Prefs.model != s.model) {
+                Prefs.model = s.model
+                Log.i(TAG, "model by key ${s.modelHex}")
+            }
+            return mine
+        }
+        if (s.rssi < STRICT_RSSI) return false
+        if (!Devices.hasPairedAirPods(this)) return false
         val saved = Prefs.model
         if (saved == 0) {
             if (s.rssi < LEARN_RSSI || s.case == null) return false

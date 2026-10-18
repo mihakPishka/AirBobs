@@ -43,6 +43,19 @@ object Devices {
 
     fun anyConnected(ctx: Context) = list(ctx).any { it.connected }
 
+    /** Есть ли на телефоне спаренные AirPods — без них ничьи сигналы своими не считаем. */
+    fun hasPairedAirPods(ctx: Context): Boolean {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - pairedAt > 10_000) {  // вызывается на каждый BLE-пакет — список кэшируем
+            paired = list(ctx).any { it.name.contains("AirPods", ignoreCase = true) }
+            pairedAt = now
+        }
+        return paired
+    }
+
+    private var paired = false
+    private var pairedAt = -60_000L
+
     private fun isConnected(d: BluetoothDevice): Boolean =
         runCatching { d.javaClass.getMethod("isConnected").invoke(d) as Boolean }.getOrDefault(false)
 

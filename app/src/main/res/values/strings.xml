@@ -68,7 +68,7 @@
     <string name="test_popup">Show pop-up</string>
     <string name="test_popup_sub">Preview with the latest data</string>
     <string name="version">App version</string>
-    <string name="nearby_list">Nearby</string>
+    <string name="nearby_list">Nearby (including other people\'s)</string>
     <string name="mine">Mine</string>
     <string name="forget">Forget</string>
     <string name="debug">Debug</string>
@@ -147,4 +147,8 @@
     <string name="loc_service">Location turned on</string>
     <string name="loc_service_sub">Without it the phone doesn\'t see AirPods nearby</string>
     <string name="turn_on">Turn on</string>
+    <string name="guard_on">Protection on</string>
+    <string name="guard_on_sub">Only your AirPods are shown: the app recognises them by their own key. Other people\'s AirPods, even the same model, are ignored.</string>
+    <string name="guard_basic">Basic protection</string>
+    <string name="guard_basic_sub">No key yet: only AirPods of your model held right next to the phone are shown. Connect your AirPods once to switch on full protection.</string>
 </resources>

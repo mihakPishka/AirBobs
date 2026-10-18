@@ -66,7 +66,7 @@
     <string name="test_popup">Показать окно</string>
     <string name="test_popup_sub">Пример с последними данными</string>
     <string name="version">Версия</string>
-    <string name="nearby_list">Рядом</string>
+    <string name="nearby_list">Рядом (включая чужие)</string>
     <string name="mine">Мои</string>
     <string name="forget">Забыть</string>
     <string name="debug">Отладка</string>
@@ -145,4 +145,8 @@
     <string name="loc_service">Геолокация включена</string>
     <string name="loc_service_sub">Без неё телефон не видит AirPods рядом</string>
     <string name="turn_on">Включить</string>
+    <string name="guard_on">Защита включена</string>
+    <string name="guard_on_sub">Показываются только твои AirPods: приложение узнаёт их по их собственному ключу. Чужие, даже такой же модели, игнорируются.</string>
+    <string name="guard_basic">Базовая защита</string>
+    <string name="guard_basic_sub">Ключа пока нет: показываются только AirPods твоей модели прямо у телефона. Подключи свои AirPods один раз — включится полная защита.</string>
 </resources>
